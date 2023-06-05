@@ -4,9 +4,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.Validation;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class LocalValidation implements FormulaValidator{
     @Override
@@ -35,14 +37,20 @@ public class LocalValidation implements FormulaValidator{
 
     @Override
     public ValidationResult hasVerifiedParams(String input, String... params) {
-        String prefixPattern = "[\\+\\-\\*\\\\]?";
-        String suffixPattern = "[\\-\\+\\*\\\\\\^]?";
-        String fullPattern = prefixPattern + params[0] + suffixPattern;
+        for(String p : params){
+            char[] chars = p.toCharArray();
+            Arrays.fill(chars,'*');
+            input = input.replaceAll(p,new String(chars));
+        }
+//        System.out.println("input after fill: " + input);
 
-        Pattern pattern = Pattern.compile(fullPattern);
+        String regex = "[a-zA-Z]";
+        Pattern pattern  = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
-        String result = matcher.group();
-        return null;
+        boolean hasMatch = matcher.find();
+        int errorIndex = hasMatch ? matcher.start() : -1;
+        var message = hasMatch ? ValidationMessage.PARAMS_FAIL : ValidationMessage.PARAMS_PASS;
+        return new ValidationResult(!hasMatch, errorIndex, message);
     }
 
     @Override

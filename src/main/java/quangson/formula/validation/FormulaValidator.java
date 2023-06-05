@@ -12,7 +12,9 @@ public interface FormulaValidator {
     enum ValidationMessage {
         UNBALANCED1("Closing parenthesis detected without opening counterpart"),
         UNBALANCED2("Opened parenthesis without closing pair detected"),
-        BALANCED("Balance input");
+        BALANCED("Balance input"),
+        PARAMS_PASS("No undefined parameters detected"),
+        PARAMS_FAIL("An undefined parameter was detected");
 
         private final String message;
         ValidationMessage(String message){
