@@ -1,14 +1,9 @@
 package quangson.formula.validation;
 
-import jakarta.validation.Valid;
-import jakarta.validation.Validation;
-
-import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.Deque;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class LocalValidation implements FormulaValidator{
     @Override
@@ -55,6 +50,40 @@ public class LocalValidation implements FormulaValidator{
 
     @Override
     public ValidationResult hasMisusedOperators(String input) {
-        return null;
+        int len = input.length();
+        String illegalStart = "[+*/%^]";
+        boolean firstCheck = Pattern.compile(illegalStart)
+                .matcher(input.substring(0,1))
+                .matches();
+        if(firstCheck){
+            return new ValidationResult(false,0,ValidationMessage.MISUSE_OPERATOR);
+        }
+        String illegalEnd = "[+*/%^\\-]";
+        boolean lastCheck = Pattern.compile(illegalEnd)
+                .matcher(input.substring(len-1,len))
+                .matches();
+        if(lastCheck){
+            return new ValidationResult(false, len-1, ValidationMessage.MISUSE_OPERATOR);
+        }
+        List<Character> operators = List.of('+','-','*','/','%','^');
+        for(int i =1; i <len-1; i++){
+            char c = input.charAt(i);
+            if(operators.contains(c)){
+                char prev = input.charAt(i-1);
+                char next = input.charAt(i+1);
+                switch (prev) {
+                    case '(', '+', '-','*', '/', '%', '^' -> {
+                        return new ValidationResult(false, i, ValidationMessage.MISUSE_OPERATOR);
+                    }
+                }
+                switch (next) {
+                    case ')', '+', '-','*', '/', '%', '^' -> {
+                        return new ValidationResult(false, i, ValidationMessage.MISUSE_OPERATOR);
+                    }
+                }
+            }
+
+        }
+        return new ValidationResult(true, -1, ValidationMessage.CORRECT);
     }
 }

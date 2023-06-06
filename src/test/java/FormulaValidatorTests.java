@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import quangson.formula.validation.FormulaValidator;
 import quangson.formula.validation.LocalValidation;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Arrays;
 
 import static quangson.formula.validation.FormulaValidator.ValidationResult;
 import static quangson.formula.validation.FormulaValidator.ValidationMessage;
@@ -45,56 +44,7 @@ public class FormulaValidatorTests {
         String input = "()(";
         var result = localValidator.hasBalancedParentheses(input);
         var expected = new ValidationResult(false, -1, ValidationMessage.UNBALANCED2);
-    }
-
-//    @Test
-//    @DisplayName("Test Regex patterns and results")
-//    void regex1() {
-//        String[] params = new String[]{"a", "b"};
-//        String input = "a+b";
-//        String prefixPattern = "[+\\-*\\]?";
-//        String suffixPattern = "[\\-+*\\\\^]?";
-//        String fullPattern = prefixPattern + params[0] + suffixPattern;
-//
-//        Pattern pattern = Pattern.compile(fullPattern);
-//        System.out.println("Pattern: " + pattern.pattern());
-//        Matcher matcher = pattern.matcher(input);
-//        while (matcher.find()) {
-//            String result = matcher.group();
-//            System.out.println(result);
-//        }
-////        System.out.println(matcher.find());
-//    }
-
-    @Test
-    @DisplayName("remove params as regex pattern from string and see if only operators and numbers remain")
-    void regex2(){
-        String input = "((4x-y)/z + 83d)";
-        String[] params = {"x","y","z","d"};
-        for(String p : params){
-            input = input.replaceAll(p,"");
-        }
-//        System.out.println("input: " + input);
-        Pattern p = Pattern.compile("[a-zA-Z_]");
-        Matcher m = p.matcher(input);
-
-        boolean actual = m.matches();
-        Assertions.assertFalse(actual);
-    }
-
-    @Test
-    @DisplayName("detect undeclared params")
-    void regex3(){
-        String input = "((4x-y)/z + 83d)";
-        String[] params = {"x","y","z"};
-        for(String p : params){
-            input = input.replaceAll(p,"");
-        }
-        System.out.println("input: " + input);
-        Pattern p = Pattern.compile("[a-zA-Z]");
-        Matcher m = p.matcher(input);
-        boolean actual = m.find();
-        Assertions.assertTrue(actual);
+        Assertions.assertEquals(expected,result);
     }
 
     @Test
@@ -142,6 +92,54 @@ public class FormulaValidatorTests {
         Assertions.assertFalse(message.isValid());
         Assertions.assertEquals(14,message.errorIndex());
         Assertions.assertEquals(ValidationMessage.PARAMS_FAIL, message.error());
+    }
+
+    @Test
+    @DisplayName("Test misuse operand - detect operand at the start")
+    void test8(){
+        String[] inputs = {"+1-b*a", "/b-8", "*a*b","%9-4","^3-a+c"};
+        ValidationResult[] results = new ValidationResult[inputs.length];
+        for(int i = 0; i < inputs.length; i++){
+            results[i] = localValidator.hasMisusedOperators(inputs[i]);
+        }
+        ValidationResult expected =  new ValidationResult(false,0,ValidationMessage.MISUSE_OPERATOR);
+        long count = Arrays.stream(results)
+                .filter( vr -> vr.equals(expected))
+                .count();
+
+        Assertions.assertEquals(inputs.length, count);
+    }
+
+    @Test
+    @DisplayName("Test misuse operand - detect operand at the end")
+    void test9(){
+        String[] inputs = {"1-b*a+", "b-8/", "a*b*","9-4%","3-a+c^", "a-b-"};
+        ValidationResult[] results = new ValidationResult[inputs.length];
+        for(int i = 0; i < inputs.length; i++){
+            results[i] = localValidator.hasMisusedOperators(inputs[i]);
+        }
+
+        long count = Arrays.stream(results)
+                .filter( vr -> !vr.isValid() && vr.errorIndex() > 0 && vr.error().equals(ValidationMessage.MISUSE_OPERATOR))
+                .count();
+
+        Assertions.assertEquals(inputs.length, count);
+    }
+
+    @Test
+    @DisplayName("Test misuse operand - detect operand in the middle")
+    void test10(){
+        String[] inputs = {"1-b**a", "b--8", "a++b","9%%4","3-a^^c", "a//b"};
+        ValidationResult[] results = new ValidationResult[inputs.length];
+        for(int i = 0; i < inputs.length; i++){
+            results[i] = localValidator.hasMisusedOperators(inputs[i]);
+        }
+
+        long count = Arrays.stream(results)
+                .filter( vr -> !vr.isValid() && vr.errorIndex() > 0 && vr.error().equals(ValidationMessage.MISUSE_OPERATOR))
+                .count();
+
+        Assertions.assertEquals(inputs.length, count);
     }
 
 }
