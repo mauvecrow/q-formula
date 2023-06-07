@@ -7,19 +7,11 @@ import java.util.*;
 public class LocalEvaluator implements Evaluator {
 
     @Override
-    public BigDecimal evaluate(final String expression) {
-        String solution = solve(expression);
-        boolean isNegative = solution.charAt(0) == '!';
-        solution = isNegative ? solution.substring(1) : solution;
-        BigDecimal bigD = BigDecimal.valueOf(Double.parseDouble(solution));
-        return isNegative ? BigDecimal.ZERO.subtract(bigD) : bigD;
-    }
-
-    public String solve(final String expression) {
+    public String evaluate(final String expression) {
         String exprCopy = expression;
-        exprCopy = expression.charAt(0) == '-' ? "!" + exprCopy.substring(1) : exprCopy;
+        exprCopy = expression.charAt(0) == '-' ? "~" + exprCopy.substring(1) : exprCopy;
         List<int[]> operations = getOperations(exprCopy);
-//        operations.forEach( (arr) -> System.out.println(Arrays.toString(arr)));
+
         while(!operations.isEmpty()){
             int[] next = operations.remove(0);
             int opIndex = next[0];
@@ -56,7 +48,7 @@ public class LocalEvaluator implements Evaluator {
                 return 1;
             }
             else if(priority2 == priority1){
-                return Integer.compare(index2, index1);
+                return Integer.compare(index1, index2);
             }
             else return -1;
         });
@@ -73,8 +65,8 @@ public class LocalEvaluator implements Evaluator {
     }
 
     private String calculate(char operator, String operand1, String operand2) {
-        double d1 = operand1.charAt(0) == '!' ? Double.parseDouble("-"+operand1.substring(1)) : Double.parseDouble(operand1);
-        double d2 = operand2.charAt(0) == '!' ? Double.parseDouble("-"+operand2.substring(1)) : Double.parseDouble(operand2);
+        double d1 = operand1.charAt(0) == '~' ? Double.parseDouble("-"+operand1.substring(1)) : Double.parseDouble(operand1);
+        double d2 = operand2.charAt(0) == '~' ? Double.parseDouble("-"+operand2.substring(1)) : Double.parseDouble(operand2);
 
         BigDecimal bd1 = BigDecimal.valueOf(d1);
         BigDecimal bd2 = BigDecimal.valueOf(d2);
@@ -88,7 +80,7 @@ public class LocalEvaluator implements Evaluator {
             case '-' -> bd1.subtract(bd2);
             default -> throw new IllegalStateException("Unexpected value: " + operator);
         };
-        return result.intValue() > 0 ? String.valueOf(result) : "!" + String.valueOf(result).substring(1);
+        return result.intValue() > 0 ? String.valueOf(result) : "~" + String.valueOf(result).substring(1);
     }
 
     private boolean isAnOperator(char c) {
