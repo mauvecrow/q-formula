@@ -65,14 +65,27 @@ public class LocalValidation implements FormulaValidator{
         if(lastCheck){
             return new ValidationResult(false, len-1, ValidationMessage.MISUSE_OPERATOR);
         }
-        List<Character> operators = List.of('+','-','*','/','%','^');
+//        List<Character> operators = List.of('+','-','*','/','%','^');
+        List<Character> operators = List.of('+','*','/','%','^');
         for(int i =1; i <len-1; i++){
             char c = input.charAt(i);
+            char prev = input.charAt(i-1);
+            char next = input.charAt(i+1);
             if(operators.contains(c)){
-                char prev = input.charAt(i-1);
-                char next = input.charAt(i+1);
                 switch (prev) {
                     case '(', '+', '-','*', '/', '%', '^' -> {
+                        return new ValidationResult(false, i, ValidationMessage.MISUSE_OPERATOR);
+                    }
+                }
+                switch (next) {
+                    case ')', '+', '-','*', '/', '%', '^' -> {
+                        return new ValidationResult(false, i, ValidationMessage.MISUSE_OPERATOR);
+                    }
+                }
+            }
+            else if(c == '-'){
+                switch (prev) {
+                    case '+', '-','*', '/', '%', '^' -> {
                         return new ValidationResult(false, i, ValidationMessage.MISUSE_OPERATOR);
                     }
                 }
