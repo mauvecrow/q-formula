@@ -1,7 +1,5 @@
 package quangson.formula.evaluation;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 
 public class LocalEvaluator implements Evaluator {
@@ -68,19 +66,17 @@ public class LocalEvaluator implements Evaluator {
         double d1 = operand1.charAt(0) == '~' ? Double.parseDouble("-"+operand1.substring(1)) : Double.parseDouble(operand1);
         double d2 = operand2.charAt(0) == '~' ? Double.parseDouble("-"+operand2.substring(1)) : Double.parseDouble(operand2);
 
-        BigDecimal bd1 = BigDecimal.valueOf(d1);
-        BigDecimal bd2 = BigDecimal.valueOf(d2);
-
-        BigDecimal result = switch (operator) {
-            case '^' -> BigDecimal.valueOf(Math.pow(d1, d2)); //Math.pow only uses float args
-            case '*' -> bd1.multiply(bd2);
-            case '/' -> bd1.divide(bd2, RoundingMode.CEILING);
-            case '%' -> BigDecimal.valueOf(d1 % d2);
-            case '+' -> bd1.add(bd2);
-            case '-' -> bd1.subtract(bd2);
+        double result = switch (operator) {
+            case '^' -> Math.pow(d1, d2);
+            case '*' -> d1 * d2;
+            case '/' -> d1 / d2;
+            case '%' -> d1 % d2;
+            case '+' -> d1 + d2;
+            case '-' -> d1 - d2;
             default -> throw new IllegalStateException("Unexpected value: " + operator);
         };
-        return result.intValue() > 0 ? String.valueOf(result) : "~" + String.valueOf(result).substring(1);
+        if(Double.isNaN(result)) throw new RuntimeException("Result is NaN");
+        return result > 0 ? String.valueOf(result) : "~" + String.valueOf(result).substring(1);
     }
 
     private boolean isAnOperator(char c) {
