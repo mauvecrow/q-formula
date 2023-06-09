@@ -28,7 +28,7 @@ public class LocalTextModifier implements TextModifier{
             // $ is a special character used and needs to escape it
         }
         temp = temp.replaceAll("[\\d.]","#");
-        System.out.println("temp: " + temp);
+//        System.out.println("temp: " + temp);
 
         List<Integer> indices = new ArrayList<>();
         for(int i=0;i<temp.length()-1;i++){
