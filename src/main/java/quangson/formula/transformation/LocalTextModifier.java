@@ -1,11 +1,14 @@
 package quangson.formula.transformation;
 
+import jakarta.enterprise.context.Dependent;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class LocalTextModifier implements TextModifier{
+@Dependent
+public class LocalTextModifier implements TextModifier {
     @Override
     public String substituteVars(String input, Map<String, String> varsMap) {
         String[] variables = getAndSortVars(varsMap);

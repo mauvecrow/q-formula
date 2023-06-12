@@ -1,10 +1,13 @@
 package quangson.formula.validation;
 
+import jakarta.enterprise.context.Dependent;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Dependent
 public class LocalValidation implements FormulaValidator{
     @Override
     public ValidationResult hasBalancedParentheses(String input) {

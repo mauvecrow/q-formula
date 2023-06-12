@@ -1,5 +1,6 @@
 package quangson.formula;
 
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import quangson.formula.evaluation.Evaluator;
 import quangson.formula.transformation.TextModifier;
@@ -7,12 +8,13 @@ import quangson.formula.validation.FormulaValidator;
 
 import java.util.*;
 
+@Dependent
 public class FormulaFacade {
     private final Evaluator evaluator;
     private final TextModifier textModifier;
     private final FormulaValidator validator;
 
-    private Map<Integer, List<String>> depthMap;
+    private final Map<Integer, List<String>> depthMap;
 
     @Inject
     public FormulaFacade(Evaluator evaluator, TextModifier textModifier, FormulaValidator validator) {
@@ -106,8 +108,6 @@ public class FormulaFacade {
             --depth; //should be zero now
         }
 
-//        String answer = evaluator.evaluate(input);
-//        depthMap.put(0,List.of(answer));
         return depthMap;
     }
 
@@ -119,27 +119,6 @@ public class FormulaFacade {
         boolean isNegative = result.charAt(0) == '~';
         return isNegative ? Double.parseDouble("-"+result.substring(1)) : Double.parseDouble(result);
     }
-
-    /*
-    public String evaluateAll(String input, Map<Integer, List<String>> depthMap){
-        int key = depthMap.size();
-        String updatedInput = input;
-        if(key > 0){
-            List<String> expressions = depthMap.get(key);
-
-            while(expressions.size() > 0){
-                String expr = expressions.remove(0);
-                String evaluableExpr = expr.substring(1,expr.length()-1); //exclude ( and )
-                String result = evaluator.evaluate(evaluableExpr);
-                updatedInput = updatedInput.replace(expr,result);
-            }
-            depthMap.remove(key);
-            return evaluateAll(updatedInput, depthMap);
-        }
-        return updatedInput;
-    }
-
-     */
 
 
 }

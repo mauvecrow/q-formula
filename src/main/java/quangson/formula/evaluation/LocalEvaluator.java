@@ -1,7 +1,10 @@
 package quangson.formula.evaluation;
 
+import jakarta.enterprise.context.Dependent;
+
 import java.util.*;
 
+@Dependent
 public class LocalEvaluator implements Evaluator {
 
     @Override
